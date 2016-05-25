@@ -30,6 +30,17 @@ public class Allocate
 		double VAL = Double.parseDouble(sb.toString());
 
 
+		// Build portfolio
+		Asset domestic = new Asset("vti", .2);
+		Asset intl     = new Asset("jpin", .2);
+		Asset reits    = new Asset("vgsix", .15);
+		Asset emerging = new Asset("vwo", .1);
+		Asset treas    = new Asset("long-term treasuries", .1);
+		Asset gold     = new Asset("gld", .075);
+		Asset tips     = new Asset("vipsx", .075);
+		Asset spec     = new Asset("speculation", .05);
+
+
 		// Get timestamp of file created
 		Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -65,14 +76,9 @@ public class Allocate
 			pw.println("\n--------------------------------");
 			pw.println("\nTARGET VALUES:");
 
-			pw.println("\n    VTI:  " + toDollar(.2 * VAL));
-			pw.println("\n   JPIN:  " + toDollar(.2 * VAL));
-			pw.println("\n  VGSIX:  " + toDollar(.15 * VAL));
-			pw.println("\n  Treas:  " + toDollar(.15 * VAL));
-			pw.println("\n    VWO:  " + toDollar(.1 * VAL));
-			pw.println("\n    GLD:  " + toDollar(.075 * VAL));
-			pw.println("\n  VIPSX:  " + toDollar(.075 * VAL));
-			pw.println("\n   Spec:  " + toDollar(.05 * VAL));
+			for (Asset a : Asset.assets) {
+				pw.printf("%n%s:  %s%n", a.ticker, toDollar(a.allocation * VAL));
+			}
 
 			pw.print("\n--------------------------------");
 
