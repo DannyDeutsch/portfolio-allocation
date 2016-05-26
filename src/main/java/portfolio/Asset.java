@@ -1,3 +1,5 @@
+package portfolio;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -13,7 +15,8 @@ public class Asset
 	{
 		this.ticker = ticker;
 		this.allocation = allocation;
-		//TODO:
+
+		//TODO: retrieve current price from Yahoo Finance
 		this.price = 10;
 
 		assets.add(this);
