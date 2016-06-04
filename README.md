@@ -18,3 +18,5 @@ Sponsored by TR & VG?
 Show JA
 
 Share buttons, social media, etc.
+
+'mark' should not necessarily initialize to 'curPrice'

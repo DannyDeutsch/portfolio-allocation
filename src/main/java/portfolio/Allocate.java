@@ -2,8 +2,9 @@ package portfolio;
 
 import java.util.*;
 import java.io.*;
-
 import java.text.SimpleDateFormat;
+
+// import com.yahoofinance-api.YahooFinanceAPI;
 
 
 public class Allocate
@@ -11,6 +12,8 @@ public class Allocate
 	
 	public static void main(String[] args)
 	{
+		// Stock stock = YahooFinance.get("INTC");
+
 		// Read value from stdin
 		Scanner scanner = new Scanner(System.in);
 		String valStr;
