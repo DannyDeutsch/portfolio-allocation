@@ -1,10 +1,8 @@
-package portfolio;
-
 import java.util.*;
 import java.io.*;
 import java.text.SimpleDateFormat;
 
-// import com.yahoofinance-api.YahooFinanceAPI;
+import yahoofinance.*;
 
 
 public class Allocate
@@ -12,48 +10,62 @@ public class Allocate
 	
 	public static void main(String[] args)
 	{
-		// Stock stock = YahooFinance.get("INTC");
+		YahooFinance yf = new YahooFinance();
+
+		List<Stock> portfolio = new ArrayList<Stock>();
+
+		try {
+			portfolio.add(yf.get("vti"));
+			portfolio.add(yf.get("jpin"));
+			portfolio.add(yf.get("vgsix"));
+			portfolio.add(yf.get("vwo"));
+			portfolio.add(yf.get("gld"));
+			portfolio.add(yf.get("vipsx"));
+		} catch (IOException e) {
+			System.out.println("IOException");
+		}
 
 		// Read value from stdin
-		Scanner scanner = new Scanner(System.in);
-		String valStr;
+		// Scanner scanner = new Scanner(System.in);
+		// String valStr;
 
-		System.out.print("Enter current portfolio value:\n> $");
+		// System.out.print("Enter current portfolio value:\n> $");
 
-		valStr = scanner.next();
+		// valStr = scanner.next();
 
 
 		// Handle commas in input
-		StringBuilder sb = new StringBuilder();
+		// StringBuilder sb = new StringBuilder();
 
-		for (int i = 0; i < valStr.length(); i++) {
-			if (valStr.charAt(i) == ',') continue;
+		// for (int i = 0; i < valStr.length(); i++) {
+		// 	if (valStr.charAt(i) == ',') continue;
 
-			sb.append(valStr.charAt(i));
-		}
+		// 	sb.append(valStr.charAt(i));
+		// }
 
-		double VAL = Double.parseDouble(sb.toString());
+		// double VAL = Double.parseDouble(sb.toString());
+		double VAL = 40000;
 
 
 		// Build portfolio
-		Asset domestic = new Asset("vti", .2);
-		Asset intl     = new Asset("jpin", .2);
-		Asset reits    = new Asset("vgsix", .15);
-		Asset emerging = new Asset("vwo", .1);
-		Asset treas    = new Asset("long-term treasuries", .1);
-		Asset gold     = new Asset("gld", .075);
-		Asset tips     = new Asset("vipsx", .075);
-		Asset spec     = new Asset("speculation", .05);
+		// Asset domestic = new Asset("vti", .2);
+		// Asset intl     = new Asset("jpin", .2);
+		// Asset reits    = new Asset("vgsix", .15);
+		// Asset emerging = new Asset("vwo", .1);
+		// Asset treas    = new Asset("long-term treasuries", .1);
+		// Asset gold     = new Asset("gld", .075);
+		// Asset tips     = new Asset("vipsx", .075);
+		// Asset spec     = new Asset("speculation", .05);
 
 
 		// Get timestamp of file created
 		Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 
-        File dir = new File("allocations/" + sdf.format(cal.getTime()));
+        File dir = new File("src/main/allocations/" + sdf.format(cal.getTime()));
         dir.mkdirs();
 
-        sdf = new SimpleDateFormat("MM-dd_" + valStr);
+        sdf = new SimpleDateFormat("MM-dd_" + String.valueOf(VAL));
 
 		File f = new File(dir, sdf.format(cal.getTime()) + ".txt");
 
@@ -81,9 +93,9 @@ public class Allocate
 			pw.println("\n--------------------------------");
 			pw.println("\nTARGET VALUES:");
 
-			for (Asset a : Asset.assets) {
-				pw.printf("%n%s:  %s%n", a.ticker, toDollar(a.allocation * VAL));
-			}
+			// for (Asset a : Asset.assets) {
+			// 	pw.printf("%n%s:  %s%n", a.ticker, toDollar(a.allocation * VAL));
+			// }
 
 			pw.print("\n--------------------------------");
 
@@ -92,6 +104,8 @@ public class Allocate
 		catch (FileNotFoundException ex) { System.out.println(ex); }
 
 	}
+
+
 
 
 	/* Adds commas, and truncates to 2 decimal places */

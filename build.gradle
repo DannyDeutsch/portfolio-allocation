@@ -7,3 +7,10 @@ repositories {
 dependencies {
     compile group: 'com.yahoofinance-api', name: 'YahooFinanceAPI', version: '3.2.0'
 }
+
+
+
+task execute(type: JavaExec) {
+	main = "Allocate"
+	classpath = sourceSets.main.runtimeClasspath
+}
