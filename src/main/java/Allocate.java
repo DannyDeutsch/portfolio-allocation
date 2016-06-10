@@ -2,108 +2,112 @@ import java.util.*;
 import java.io.*;
 import java.text.SimpleDateFormat;
 
-import yahoofinance.*;
+// import yahoofinance.*;
 
 
 public class Allocate
 {
+	private static double VAL;
+	private static double settlementVAL;
+	private static List<Asset> portfolio = new ArrayList<Asset>();
+	private static final Calendar cal = Calendar.getInstance();
 	
+
 	public static void main(String[] args)
 	{
-		YahooFinance yf = new YahooFinance();
-
-		List<Stock> portfolio = new ArrayList<Stock>();
-
-		try {
-			portfolio.add(yf.get("vti"));
-			portfolio.add(yf.get("jpin"));
-			portfolio.add(yf.get("vgsix"));
-			portfolio.add(yf.get("vwo"));
-			portfolio.add(yf.get("gld"));
-			portfolio.add(yf.get("vipsx"));
-		} catch (IOException e) {
-			System.out.println("IOException");
-		}
-
-		// Read value from stdin
-		// Scanner scanner = new Scanner(System.in);
-		// String valStr;
-
-		// System.out.print("Enter current portfolio value:\n> $");
-
-		// valStr = scanner.next();
+		// My portfolio
+		settlementVAL = 18713.66;
+		portfolio.add(new Asset("VTI", 500.0, .2));
+		portfolio.add(new Asset("JPIN", 67.42, .2));
+		portfolio.add(new Asset("VGSIX", 11.93, .15));
+		portfolio.add(new Asset("Long-term US treasuries", 100.27, .15));
+		portfolio.add(new Asset("VWO", 1229.83, .1));
+		portfolio.add(new Asset("GLD", 8, .075));
+		portfolio.add(new Asset("VIPSX", 3044.94, .075));
+		portfolio.add(new Asset("Speculation", 17472.1, .05));
 
 
-		// Handle commas in input
-		// StringBuilder sb = new StringBuilder();
+		for (Asset a : portfolio) a.print();
 
-		// for (int i = 0; i < valStr.length(); i++) {
-		// 	if (valStr.charAt(i) == ',') continue;
-
-		// 	sb.append(valStr.charAt(i));
-		// }
-
-		// double VAL = Double.parseDouble(sb.toString());
-		double VAL = 40000;
+		// Calculate portfolio balance 'VAL'
+		for (Asset a : portfolio) VAL += a.bal;
+		VAL = VAL + settlementVAL - 2000;	//keep 2k in settlement fund
 
 
-		// Build portfolio
-		// Asset domestic = new Asset("vti", .2);
-		// Asset intl     = new Asset("jpin", .2);
-		// Asset reits    = new Asset("vgsix", .15);
-		// Asset emerging = new Asset("vwo", .1);
-		// Asset treas    = new Asset("long-term treasuries", .1);
-		// Asset gold     = new Asset("gld", .075);
-		// Asset tips     = new Asset("vipsx", .075);
-		// Asset spec     = new Asset("speculation", .05);
-
-
-		// Get timestamp of file created
-		Calendar cal = Calendar.getInstance();
+		// Create then write output file
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 
         File dir = new File("src/main/allocations/" + sdf.format(cal.getTime()));
         dir.mkdirs();
 
-        sdf = new SimpleDateFormat("MM-dd_" + String.valueOf(VAL));
+        sdf = new SimpleDateFormat("M-d_" + toDollar(VAL));
 
 		File f = new File(dir, sdf.format(cal.getTime()) + ".txt");
 
+		writeFile(f);
+	}
+
+
+
+
+
+	private static void writeFile(File f)
+	{
 		try
 		{
 			PrintWriter pw = new PrintWriter(f);
-
-			sdf = new SimpleDateFormat("MMMM dd, yyyy");
+			SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy");
 
 			pw.println(sdf.format(cal.getTime()));
-			pw.println("\nCurrent portfolio value:  " + toDollar(VAL));
-
+			pw.printf("Portfolio balance:  %s%n", toDollar(VAL));
 			pw.println("\n--------------------------------");
-			pw.println("\nALLOCATION:");
-
-			pw.println("\n20%   Domestic stock (VTI)");
-			pw.println("\n20%   International stock (JPIN)");
-			pw.println("\n15%   REITs (VGSIX)");
-			pw.println("\n15%   Long-term US treasuries (?)");
-			pw.println("\n10%   Emerging markets stock (VWO)");
-			pw.println("\n7.5%  Gold (GLD)");
-			pw.println("\n7.5%  TIPs (VIPSX)");
-			pw.println("\n5%    Speculation");
-
+			pw.println("\nALLOCATION:\n");
+			pw.println("20%   Domestic stock (VTI)");
+			pw.println("20%   International stock (JPIN)");
+			pw.println("15%   REITs (VGSIX)");
+			pw.println("15%   Long-term US treasuries");
+			pw.println("10%   Emerging markets stock (VWO)");
+			pw.println("7.5%  Gold (GLD)");
+			pw.println("7.5%  TIPs (VIPSX)");
+			pw.println("5%    Speculation");
 			pw.println("\n--------------------------------");
-			pw.println("\nTARGET VALUES:");
 
-			// for (Asset a : Asset.assets) {
-			// 	pw.printf("%n%s:  %s%n", a.ticker, toDollar(a.allocation * VAL));
-			// }
 
-			pw.print("\n--------------------------------");
+			pw.println("\nTARGET BALANCES:");
+			for (Asset a : portfolio)
+			{
+				pw.printf("%n%s (%s)%n", a.symbol, String.format("%.1f%%", 100 * a.allocation));
+				pw.printf("  Target:  %s%n", toDollar(a.allocation * VAL));
+				pw.printf("  Balance: %s%n", toDollar(a.bal));
+				
+				try {
+					pw.println("  Price:   " + a.yfStock.getQuote().getPrice());
+					double shareDif = Math.floor(((VAL * a.allocation) - (a.bal)) / a.yfStock.getQuote().getPrice().doubleValue());
+
+					if (shareDif > 0) {
+						pw.printf("  Buy %d shares%n", (int)shareDif);
+					} else {
+						pw.printf("  Sell %d shares%n", -1 * (int)shareDif);
+					}
+				} catch (NullPointerException ex) {
+					double valDif = (a.allocation * VAL) - a.bal;
+
+					if (valDif > 0) {
+						pw.printf("Buy %s worth%n", toDollar(valDif));
+					} else {
+						pw.printf("Sell %s worth%n", toDollar(-1 * valDif));
+					}
+				}
+			}
 
 			pw.close();
-		}
-		catch (FileNotFoundException ex) { System.out.println(ex); }
 
+		} catch (FileNotFoundException ex) {
+			System.out.println(ex);
+		}
 	}
+
+
 
 
 
